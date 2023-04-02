@@ -22,7 +22,8 @@ app.use(cors({
         'http://localhost:4000',
         'https://hectrum.online',
         'https://api.hectrum.online',
-        "https://socket.hectrum.online"
+        "https://socket.hectrum.online",
+        "https://admin.hectrum.online"
     ],
     credentials: true
 }));
