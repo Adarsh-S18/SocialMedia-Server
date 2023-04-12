@@ -34,6 +34,6 @@ router.delete("/:id/rejectReport", resolveReport);
 
 router.put("/:id/comment", addComment)
 
-router.delete("/:id/delete-comment" ,deleteComment)
+router.delete("/:id/delete-comment" ,deleteComment)     
 
 export default router
