@@ -10,10 +10,15 @@ import ConversationRoute from './Routes/ConversationRoute.js'
 import MessageRoute from './Routes/MessageRoute.js'
 
 const app = express();
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Credentials", true);
+    next();
+});
 
 // M I D D L E W A R E S 
 app.use(bodyParser.json({ limit: '30mb', extended: true }))
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }))
+
 
 app.use(cors({
     origin: [
@@ -28,6 +33,13 @@ app.use(cors({
     credentials: true
 }));
 
+
+// app.use(
+//     cors({
+//         origin: "*",
+//     })
+// );
+
 dotenv.config()
 mongoose.set("strictQuery", false);
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
@@ -40,5 +52,5 @@ mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopol
 app.use('/api/auth', AuthRoute);
 app.use('/api/users', UserRoute);
 app.use('/api/posts', PostRoute)
-app.use('/api/conversations',ConversationRoute)
+app.use('/api/conversations', ConversationRoute)
 app.use('/api/messages', MessageRoute);
