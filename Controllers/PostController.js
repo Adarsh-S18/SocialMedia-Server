@@ -87,16 +87,15 @@ export const likePost = async (req, res) => {
 
 export const getTimelinePost = async (req, res) => {
     try {
-        const userid= jwt.decode(req.headers['token'].split(" ")[1]).id;
+        const userid = jwt.decode(req.headers['token'].split(" ")[1]).id;
         if (userid) {
             const currentUser = await UserModel.findById(userid)
-            const userPosts = await PostModel.find({ userId: currentUser._id , _id: { $nin: currentUser.reportedPost } });
+            const userPosts = await PostModel.find({ userId: currentUser._id, _id: { $nin: currentUser.reportedPost } });
             const friendPosts = await Promise.all(
                 currentUser.following.map((friendId) => {
-                    return PostModel.find({ userId: friendId,_id: { $nin: currentUser.reportedPost } });
+                    return PostModel.find({ userId: friendId, _id: { $nin: currentUser.reportedPost } });
                 })
             );
-            console.log(friendPosts,"hasd")
             res.status(200).json(userPosts.concat(...friendPosts));
         } else {
             const userPosts = await PostModel.find();
@@ -132,7 +131,7 @@ export const allPosts = async (req, res) => {
 export const addComment = async (req, res) => {
     try {
         const comment = req.body;
-        comment.userId = jwt.decode(req.headers['token'].split(" ")[1]).id 
+        comment.userId = jwt.decode(req.headers['token'].split(" ")[1]).id
         const post = await PostModel.findById(req.params.id);
         await post.updateOne({ $push: { comments: comment } });
         res.status(200).json("commented successfully");
@@ -142,85 +141,100 @@ export const addComment = async (req, res) => {
     }
 }
 
-export const allReports = async(req,res)=>{
+
+export const deleteComment = async (req, res) => {
+    try {
+        const commentId = req.params.id
+        const post = await PostModel.findOne({ "comments._id": commentId })
+        await post.updateOne({ $pull: { comments: { _id: commentId } } })
+        res.status(200).json("Comment deleted Successfully")
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+
+}
+
+export const allReports = async (req, res) => {
     console.log("oooh no")
     try {
         const reports = await ReportModel.find();
         res.status(200).json(reports);
-      } catch (err) {
+    } catch (err) {
         console.log(err);
         res.status(500).json(err);
-      }
+    }
 }
 
 
-export const reportPost = async(req,res)=>{
+export const reportPost = async (req, res) => {
     try {
         const post = await PostModel.findById(req.params.id);
-        const user =jwt.decode(req.headers['token'].split(" ")[1]).id 
+        const user = jwt.decode(req.headers['token'].split(" ")[1]).id
         const theUser = await UserModel.findById(user)
         req.body.userId = user;
         req.body.name = theUser.email;
         req.body.postId = post._id;
 
-        console.log(req.body.userId,req.body.postId,"asddsaadsdsadsa");
+        console.log(req.body.userId, req.body.postId, "asddsaadsdsadsa");
         req.body.post = post?.img;
         req.body.desc = post.desc;
         req.body.type = "post";
 
         if (post?.reports.filter((e) => e === user).length <= 0) {
-          await theUser.updateOne({$push: {reportedPost: req.body.postId.toString()}});
-          await post.updateOne({ $push: { reports: user } });
-          const newReport = new ReportModel(req.body);
-          const savedReport = await newReport.save();
-          res.status(200).json(savedReport);
+            await theUser.updateOne({ $push: { reportedPost: req.body.postId.toString() } });
+            await post.updateOne({ $push: { reports: user } });
+            const newReport = new ReportModel(req.body);
+            const savedReport = await newReport.save();
+            res.status(200).json(savedReport);
         } else {
-          res.status(403).json("You already reported this post");
+            res.status(403).json("You already reported this post");
         }
-      } catch (err) {
+    } catch (err) {
         res.status(500).json(err);
         console.log(err);
-      }
+    }
 }
 
 
-export const rejectReport = async(req,res)=>{
+export const rejectReport = async (req, res) => {
     try {
-        console.log(req.query.name,"userid")
-        console.log(req.params.id,"postid")
-        var isPostFound = true; 
+        console.log(req.query.name, "userid")
+        console.log(req.params.id, "postid")
+        var isPostFound = true;
         const post = await PostModel.findById(req.params.id)
-        if(!post){
+        if (!post) {
             res.status(403).json("Post not found");
             isPostFound = false;
         }
-        await post.updateOne({$pull:{ reports : req.query.name}}).then((res)=>{
-            console.log(res,"hm")
+        await post.updateOne({ $pull: { reports: req.query.name } }).then((res) => {
+            console.log(res, "hm")
         })
-        await ReportModel.deleteMany({_id:req.query.id})
+        await ReportModel.deleteMany({ _id: req.query.id })
         res.status(200).json("Report Removed")
     } catch (error) {
-        if(isPostFound){
+        if (isPostFound) {
             res.status(500).json(error)
         }
         console.log(error)
     }
 }
 
-export const resolveReport = async(req,res)=>{
+export const resolveReport = async (req, res) => {
     try {
         var isPostFound = true
         const post = await PostModel.findById(req.params.id)
-        if(!post){
+        if (!post) {
             res.status(403).json("Post not found !")
-            isPostFound=false;
+            isPostFound = false;
         }
         await post.deleteOne()
-        await ReportModel.deleteMany({_id : req.query.id})
+        await ReportModel.deleteMany({ _id: req.query.id })
         res.status(200).json('Post deleted!')
 
     } catch (error) {
-        if(isPostFound){
+        if (isPostFound) {
             res.status(500).json(error)
         }
         console.log(error);
@@ -228,20 +242,20 @@ export const resolveReport = async(req,res)=>{
 }
 
 
-export const getPostStat = async(req,res)=>{
+export const getPostStat = async (req, res) => {
     const today = new Date()
     const latYear = today.setFullYear(today.setFullYear() - 1);
     try {
         const data = await PostModel.aggregate([
             {
-                $project :{
-                    month :{$month : "$createdAt"}
+                $project: {
+                    month: { $month: "$createdAt" }
                 }
             },
             {
-                $group:{
-                    _id :"$month",
-                    total:{ $sum :1},
+                $group: {
+                    _id: "$month",
+                    total: { $sum: 1 },
                 }
             }
         ])
@@ -249,6 +263,6 @@ export const getPostStat = async(req,res)=>{
         console.log(data)
     } catch (error) {
         console.log(error)
-        res.status(500).json(error)    
+        res.status(500).json(error)
     }
 }

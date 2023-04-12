@@ -1,5 +1,5 @@
 import express from 'express'
-import { addComment, allPosts, allReports, createPost, deletePost, getPost, getPostStat, getTimelinePost, likePost, rejectReport, reportPost, resolveReport, updatePost, userPosts } from '../Controllers/PostController.js'
+import { addComment, allPosts, allReports, createPost, deleteComment, deletePost, getPost, getPostStat, getTimelinePost, likePost, rejectReport, reportPost, resolveReport, updatePost, userPosts } from '../Controllers/PostController.js'
 
 
 const router = express.Router()
@@ -33,5 +33,7 @@ router.delete("/:id/report", rejectReport);
 router.delete("/:id/rejectReport", resolveReport);
 
 router.put("/:id/comment", addComment)
+
+router.delete("/:id/delete-comment" ,deleteComment)
 
 export default router

@@ -17,8 +17,8 @@ const UserSchema = new mongoose.Schema({
     profilePicture: {
         type: String,
         default:
-          "https://www.kindpng.com/picc/m/780-7804962_cartoon-avatar-png-image-transparent-avatar-user-image.png",
-      },
+            "https://www.kindpng.com/picc/m/780-7804962_cartoon-avatar-png-image-transparent-avatar-user-image.png",
+    },
     coverPicture: {
         type: String,
         default: ''
@@ -34,25 +34,29 @@ const UserSchema = new mongoose.Schema({
     blocked: {
         type: Boolean,
         default: false,
-      },
-      city: {
-        type: String, 
-        max: 50,
-      },
-      from: {
+    },
+    city: {
         type: String,
         max: 50,
-      },
-    desc:{
-        type:String,
-        max:20
+    },
+    from: {
+        type: String,
+        max: 50,
+    },
+    desc: {
+        type: String,
+        max: 20
     },
     reportedPost: {
         type: Array,
         default: [],
-      }
+    },
+    isVerified: {
+        type: Boolean
+    }
+
 },
     { timestamps: true })
 
-const UserModel = mongoose.model("Users",UserSchema)
+const UserModel = mongoose.model("Users", UserSchema)
 export default UserModel;
