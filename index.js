@@ -12,10 +12,10 @@ import MessageRoute from './Routes/MessageRoute.js'
 const app = express();
 
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');  
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000', 'http://localhost:4001', 'http://localhost:4000', 'https://hectrum.online', 'https://api.hectrum.online', "https://socket.hectrum.online", "https://admin.hectrum.online");
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.header("Access-Control-Allow-Credentials", true); 
+    res.header("Access-Control-Allow-Credentials", true);
     next();
 });
 
@@ -24,18 +24,18 @@ app.use(bodyParser.json({ limit: '30mb', extended: true }))
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }))
 
 
-app.use(cors({
-    origin: [
-        'http://localhost:3000',
-        'http://localhost:4001',
-        'http://localhost:4000',
-        'https://hectrum.online',
-        'https://api.hectrum.online',
-        "https://socket.hectrum.online",
-        "https://admin.hectrum.online"
-    ],
-    credentials: true
-}));
+// app.use(cors({
+//     origin: [
+//         'http://localhost:3000',
+//         'http://localhost:4001',
+//         'http://localhost:4000',
+//         'https://hectrum.online',
+//         'https://api.hectrum.online',
+//         "https://socket.hectrum.online",
+//         "https://admin.hectrum.online"
+//     ],
+//     credentials: true
+// }));
 
 
 
