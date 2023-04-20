@@ -32,7 +32,7 @@ export const getPost = async (req, res) => {
 
 export const updatePost = async (req, res) => {
     const id = req.params.id;
-    const { userId } = req.body
+    const userId= jwt.decode(req.headers['token'].split(" ")[1]).id
     try {
         const post = await PostModel.findById(id)
         if (post.userId === userId) {
@@ -145,7 +145,9 @@ export const addComment = async (req, res) => {
 export const deleteComment = async (req, res) => {
     try {
         const commentId = req.params.id
+        const userId = jwt.decode(req.headers['token'].split(" ")[1]).id
         const post = await PostModel.findOne({ "comments._id": commentId })
+
         await post.updateOne({ $pull: { comments: { _id: commentId } } })
         res.status(200).json("Comment deleted Successfully")
 

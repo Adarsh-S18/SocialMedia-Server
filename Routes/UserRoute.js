@@ -1,5 +1,6 @@
 import express from 'express'
 import { blockUser, deletePic, deleteUser, followUser, getAllUser, getFriends, getStat, getUser, unBlockUser, UnfollowUser, updateUser } from '../Controllers/UserController.js'
+import { verify } from '../Middlewares/verifyToken.js';
 
 
 const router = express.Router()
