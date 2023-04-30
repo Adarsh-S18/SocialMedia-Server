@@ -31,6 +31,7 @@ app.use((req, res, next) => {
 
 app.use(cors({
     origin: [
+        '*',
         'https://hectrum.online',
         'https://www.hectrum.online',
         'https://api.hectrum.online',
