@@ -1,7 +1,7 @@
 
 import ConversationModel from '../Models/conversationModel.js'
 import MessageModel from '../Models/messageModel.js'
-
+import jwt from 'jsonwebtoken'
 export const newConversation = async (req, res) => {
     const newConversation = new ConversationModel({
         members: [req.body.senderId, req.body.receiverId],
@@ -15,18 +15,42 @@ export const newConversation = async (req, res) => {
     }
 }
 
+export const getUnreadCount = async (req, res) => {
+    try {
+        const currentUserId = jwt.decode(req.headers['token'].split(" ")[1]).id
+        const count = await MessageModel.countDocuments({
+            conversationId: req.params.conversationId,
+            read: false,
+            receiver: currentUserId
+          });
+          
+        res.status(200).json(count);
+      } catch (err) {
+        res.status(500).json({ message: err.message });
+        console.log(err)
+      }
+}  
+
 export const addMessage = async (req, res) => {
     const newMessage = new MessageModel(req.body);
-    const conversation = ConversationModel.findById(req.body.conversationId)
-    console.log(req.body.conversationId);
+    const conversationId = req.body.conversationId;
+  
     try {
-        const savedMessage = await newMessage.save();
-        conversation.updateOne({ $inc: { lastMsg: 1 } }).then(res => console.log(res))
-        res.status(200).json(savedMessage);
+      const savedMessage = await newMessage.save();
+      const conversation = await ConversationModel.findById(conversationId);
+  
+      conversation.lastMsg += 1;
+      if (savedMessage.receiverId !== req.user.id) {
+        conversation.unreadCount += 1;
+      }
+      await conversation.save();
+  
+      res.status(200).json(savedMessage);
     } catch (err) {
-        res.status(500).json(err);
+      res.status(500).json(err);
     }
-}
+  }
+  
 
 
 export const getMessage = async (req, res) => {
@@ -39,6 +63,8 @@ export const getMessage = async (req, res) => {
         res.status(500).json(err);
     }
 }
+
+
 
 
 

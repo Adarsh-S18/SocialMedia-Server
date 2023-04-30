@@ -3,6 +3,7 @@ import PostModel from '../Models/postModel.js'
 import UserModel from '../Models/userModel.js'
 import jwt from 'jsonwebtoken';
 import ReportModel from '../Models/reportModel.js'
+import NotificationModel from '../Models/notificationModel.js';
 
 
 export const createPost = async (req, res) => {
@@ -32,7 +33,7 @@ export const getPost = async (req, res) => {
 
 export const updatePost = async (req, res) => {
     const id = req.params.id;
-    const userId= jwt.decode(req.headers['token'].split(" ")[1]).id
+    const userId = jwt.decode(req.headers['token'].split(" ")[1]).id
     try {
         const post = await PostModel.findById(id)
         if (post.userId === userId) {
@@ -66,14 +67,39 @@ export const deletePost = async (req, res) => {
 export const likePost = async (req, res) => {
     const userId = jwt.decode(req.headers['token'].split(" ")[1]).id
     const id = req.params.id
+
+    console.log(id,"odikko")
     try {
         const post = await PostModel.findById(id)
+        if (!post) {
+            res.status(403).json("Post Not Found")
+        }
+        const tempPostId = post._id.toString()
+
         if (!post.likes.includes(userId)) {
             await post.updateOne({ $push: { likes: userId } })
-            return res.status(200).json("Post Liked");
+            if (post.userId != id) {
+                NotificationModel.create({
+                    userId: post.userId,
+                    emiterId: userId,
+                    text: 'liked your post.',
+                    postId: tempPostId
+                })
+                    .then((response) => res.status(200).json("post liked"))
+                    .catch((error) => res.status(500).json(error))
+            }
+            else res.status(200).json("Post liked")
         } else {
             await post.updateOne({ $pull: { likes: userId } })
-            return res.status(200).json("Post UnLiked");
+            if (post.userId != id) {
+                NotificationModel.create({
+                    userId: post.userId,
+                    emiterId: userId,
+                    text: 'Liked your post.',
+                    postId: req.body.postId
+                }).then((response) => res.status(200).json("Post disliked"))
+                    .catch((error) => res.status(500).json(error))
+            } else res.status(200).json("post removed")
         }
     } catch (error) {
         console.log(error, "like ile errror");
@@ -131,9 +157,16 @@ export const allPosts = async (req, res) => {
 export const addComment = async (req, res) => {
     try {
         const comment = req.body;
+        const idUser = jwt.decode(req.headers['token'].split(" ")[1]).id
         comment.userId = jwt.decode(req.headers['token'].split(" ")[1]).id
         const post = await PostModel.findById(req.params.id);
         await post.updateOne({ $push: { comments: comment } });
+        NotificationModel.create({
+            userId: post.userId,
+            emiterId: idUser,
+            text: 'commented your post.',
+            postId: req.params.id
+          })
         res.status(200).json("commented successfully");
     } catch (err) {
         console.log(err);

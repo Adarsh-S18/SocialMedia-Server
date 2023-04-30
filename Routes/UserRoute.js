@@ -1,15 +1,15 @@
 import express from 'express'
-import { blockUser, deletePic, deleteUser, followUser, getAllUser, getFriends, getStat, getUser, unBlockUser, UnfollowUser, updateUser } from '../Controllers/UserController.js'
+import { blockUser, deletePic, deleteUser, followUser, getAllUser, getAUser, getFriends, getStat, getUser, unBlockUser, UnfollowUser, updateUser } from '../Controllers/UserController.js'
 import { verify } from '../Middlewares/verifyToken.js';
 
 
 const router = express.Router()
 
-router.get('/:id', getUser)
-
 router.get('/friends/:userId', getFriends);
 
 router.delete('/profilepic', deletePic)
+
+router.get('/:id',getAUser)
 
 router.get('/', getAllUser)
 

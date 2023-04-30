@@ -4,6 +4,19 @@ import jwt from 'jsonwebtoken'
 
 // G E T   U S E R 
 
+export const getAUser = async (req, res) => {
+    try {
+        
+        const user = await UserModel.findById(req.params.id)
+        const { password, updatedAt, ...other } = user._doc;
+        res.status(200).json(other);
+
+    } catch (error) {
+        res.status(500).json(error)
+        console.log(error)
+    }
+}
+
 export const getUser = async (req, res) => {
     const id = req.params.id
     try {
@@ -26,16 +39,16 @@ export const getFriends = async (req, res) => {
             user.following.map((friendId) => {
                 return UserModel.findById(friendId);
             })
-            );
-            let friendList = [];
-            friends.map((friend) => {
-                if (friend != null) {
-                    const { _id, username, profilePicture } = friend;
-                    friendList.push({ _id, username, profilePicture });
-                }
-            });
-            res.status(200).json(friendList);
-            console.log(friendList)
+        );
+        let friendList = [];
+        friends.map((friend) => {
+            if (friend != null) {
+                const { _id, username, profilePicture } = friend;
+                friendList.push({ _id, username, profilePicture });
+            }
+        });
+        res.status(200).json(friendList);
+        console.log(friendList)
     } catch (err) {
         res.status(500).json(err);
         console.log(err);
@@ -189,13 +202,13 @@ export const getStat = async (req, res) => {
     }
 }
 
-export const deletePic = async(req, res) => {
+export const deletePic = async (req, res) => {
     try {
         const userId = jwt.decode(req.headers['token'].split(" ")[1]).id
 
         const user = await UserModel.findById(userId)
         if (user.profilePicture !== "https://www.kindpng.com/picc/m/780-7804962_cartoon-avatar-png-image-transparent-avatar-user-image.png") {
-           const nowUser= await UserModel.findOneAndUpdate({ _id: userId }, { $set: { profilePicture: "https://www.kindpng.com/picc/m/780-7804962_cartoon-avatar-png-image-transparent-avatar-user-image.png" } })
+            const nowUser = await UserModel.findOneAndUpdate({ _id: userId }, { $set: { profilePicture: "https://www.kindpng.com/picc/m/780-7804962_cartoon-avatar-png-image-transparent-avatar-user-image.png" } })
             res.status(200).json(nowUser)
         } else {
             res.status(400).json("User Not found!")

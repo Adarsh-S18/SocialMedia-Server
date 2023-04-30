@@ -34,7 +34,6 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ message: "Username Already exist..!" })
         }
         const user = await newUser.save()
-        console.log(user)
         const token = jwt.sign({ username: user.username, id: user._id }, process.env.JWT_KEY, { expiresIn: '1h' })
         res.status(200).json({ user, token })
 
